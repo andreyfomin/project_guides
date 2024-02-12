@@ -7,7 +7,7 @@
 
 2. In the project root directory create DB file docker-compose.yml for testing
    with the next content
-    ```yaml {lineNumbers: true}
+    ```yaml showLineNumbers
     version: "3.9" # https://docs.docker.com/compose/gettingstarted/
     services:
       postgres:
