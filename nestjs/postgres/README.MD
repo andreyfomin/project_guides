@@ -7,7 +7,7 @@
 
 2. In the project root directory create DB file docker-compose.yml for testing
    with the next content
-    ```yaml showLineNumbers
+    ```yaml
     version: "3.9" # https://docs.docker.com/compose/gettingstarted/
     services:
       postgres:
@@ -109,7 +109,7 @@ model Post {
 
 10. Change PrismaService
 
-```{.ts attr.source='.numberLines'}
+```ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
