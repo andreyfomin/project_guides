@@ -109,7 +109,7 @@ model Post {
 
 10. Change PrismaService
 
-```{.ts, attr.source='.numberLines'}
+```{.ts attr.source='.numberLines'}
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
