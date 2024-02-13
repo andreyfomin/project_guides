@@ -339,31 +339,29 @@ export class UserController {
 ```
 
 16. Create Post controller
-    ```bash
-    npx nest g co controllers/post
-    ```
+```bash
+npx nest g co controllers/post
+```
 
 17. Change post controller
-
 ```ts
-import {Body, Controller, Get, Param, Post} from '@nestjs/common';
-import {PostService} from '../../repositories/post/post.service';
-import {Post as PostModel} from '@prisma/client';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { PostService } from '../../repositories/post/post.service';
+import { Post as PostModel } from '@prisma/client';
 
 @Controller()
 export class PostController {
-    constructor(private readonly postService: PostService) {
-    }
+    constructor(private readonly postService: PostService) {}
 
     @Get('post/:id')
     async getPostById(@Param('id') id: string): Promise<PostModel> {
-        return this.postService.post({id: Number(id)});
+        return this.postService.post({ id: Number(id) });
     }
 
     @Get('feed')
     async getPublishedPosts(): Promise<PostModel[]> {
         return this.postService.posts({
-            where: {published: true},
+            where: { published: true },
         });
     }
 
@@ -375,10 +373,10 @@ export class PostController {
             where: {
                 OR: [
                     {
-                        title: {contains: searchString},
+                        title: { contains: searchString },
                     },
                     {
-                        content: {contains: searchString},
+                        content: { contains: searchString },
                     },
                 ],
             },
@@ -389,16 +387,17 @@ export class PostController {
     async createDraft(
         @Body() postData: { title: string; content?: string; authorEmail: string },
     ): Promise<PostModel> {
-        const {title, content, authorEmail} = postData;
+        const { title, content, authorEmail } = postData;
         return this.postService.createPost({
             title,
             content,
             author: {
-                connect: {email: authorEmail},
+                connect: { email: authorEmail },
             },
         });
     }
 }
+
 ```
 
 18. Rest calls test<br>
@@ -410,8 +409,8 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-  "name": "Lital the aaa",
-  "email": "lital@mail.ru"
+  "name": "Viki Smirnoff",
+  "email": "viki@mail.rom"
 }'
 ```
 
@@ -419,7 +418,7 @@ Get all users
 
 ```shell
 curl -X 'GET' \
-  'http://localhost:3000/users' \
+  'http://localhost:3002/users' \
   -H 'accept: application/json'
 ```
 
@@ -427,7 +426,7 @@ Get all user pages
 
 ```shell
 curl -X 'GET' \
-  'http://localhost:3002/users/pages?search=aaaa&page=1&pageSize=5' \
+  'http://localhost:3002/user/pages?search=aaaa&page=1&pageSize=5' \
   -H 'accept: application/json'
 ```
 
