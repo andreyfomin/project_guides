@@ -42,7 +42,7 @@
       "scripts": {
         "start": "cd backend && npm run start:dev & cd frontend && npm start",
         "start:backend": "cd backend && npm run start:dev",
-        "start:frontend": "cd frontend && npm start",
+        "start:frontend": "cd frontend && npm start"
         // ... other scripts
       }
     }
@@ -54,35 +54,19 @@
     ```
    This will launch both the NestJS backend and the React frontend.
 
-7. Adjust CORS settings (Optional):<br> If your frontend and backend are on different origins, you might need to configure <br> CORS in your NestJS application. Install the @nestjs/express package:
-    ```shell
-    cd backend
-    npm install @nestjs/express
-    ```
-   Then, in your NestJS main.ts file, add CORS middleware:
+
+7. Adjust CORS settings (Optional):
+   <br> If your frontend and backend are on different origins, you might need to configure <br>
+   CORS in your NestJS application.<br> [Enable CORS](https://docs.nestjs.com/security/cors)
     ```typescript
-    import { NestFactory } from '@nestjs/core';
-    import { AppModule } from './app.module';
-    import { ExpressAdapter } from '@nestjs/platform-express';
-    import * as express from 'express';
-
-    async function bootstrap() {
-      const server = express();
-      const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
-
-      // Add your CORS configuration here
-      app.enableCors();
-
-      await app.listen(3001);
-    }
-
-    bootstrap();
+    const app = await NestFactory.create(AppModule, { cors: true })
     ```
    Adjust the CORS configuration according to your requirements.
 
 
 8. To change the NestJS app port and get it from a .env file if it exists, you can use the <br>
-   dotenv package to load environment variables and then configure the NestJS <br> application accordingly. Here are the steps:
+   dotenv package to load environment variables and then configure the NestJS <br> application accordingly. Here are the
+   steps:
    <br> Install the dotenv package to load environment variables from a .env file.
     ```shell
     cd backend
@@ -91,35 +75,36 @@
 9. Create a .env file:<br>
    Create a .env file in the root of your NestJS project and define the PORT variable:
    ```dotenv
-    PORT=3000
+    PORT=3002
    ```
    Adjust the port number according to your preferences.
 
 
 10. Update NestJS Configuration:<br>
     In your NestJS application (typically in the main.ts file), load the environment <br>
-    variables using dotenv and configure the app to use the specified port. Here's an <br>
+    variables using dotenv and configure the app to use the specified port. Here's an
     example:
-    ```ts {2,4} {lines:true}
-    // main.ts
-    import { NestFactory } from '@nestjs/core';
-    import { AppModule } from './app.module';
-    import * as dotenv from 'dotenv';
 
-    async function bootstrap() {
-      // Load environment variables from .env file
-      dotenv.config();
+```ts
+// main.ts
+import {NestFactory} from '@nestjs/core';
+import {AppModule} from './app.module';
+import * as dotenv from 'dotenv';
 
-      // Get the port from the environment variable or use a default value (e.g., 3000)
-      const port = process.env.PORT || 3000;
+async function bootstrap() {
+    // Load environment variables from .env file
+   dotenv.config();
 
-      const app = await NestFactory.create(AppModule);
+    // Get the port from the environment variable or use a default value (e.g., 3000)
+   const port = process.env.PORT || 3000;
 
-      // Configure the app to listen on the specified port
-      await app.listen(port);
+   const app = await NestFactory.create(AppModule, { cors: true} );
 
-      console.log(`Application is running on: http://localhost:${port}`);
-    }
+    // Configure the app to listen on the specified port
+   await app.listen(port);
 
-    bootstrap();
-    ```
+   console.log(`Application is running on: http://localhost:${port}`);
+}
+
+bootstrap();
+```
