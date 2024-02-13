@@ -1,123 +1,126 @@
 ## How Create new project with PostgreSQL
 
 1. Create new nestjs project with the name nestjs-pgdb-test
-    ```bash
-    npx -p @nestjs/cli nest new nestjs-pgdb-test
-    ```
+```bash
+npx -p @nestjs/cli nest new nestjs-pgdb-test
+```
 
-2. In the project root directory create DB file docker-compose.yml for testing
+2. In the project root directory create DB file **docker-compose.yml** for testing
    with the next content
-    ```yaml
-    version: "3.9" # https://docs.docker.com/compose/gettingstarted/
-    services:
-      postgres:
-        image: postgres:16.1
-        container_name: postgres
-        restart: always
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: testdb
-        ports:
-          - "5432:5432"
-
-      pgadmin4:
-        container_name: pgadmin4 # http://localhost:5050/
-        image: dpage/pgadmin4
-        restart: always
-        environment:
-          PGADMIN_DEFAULT_EMAIL: postgres@postgres.co
-          PGADMIN_DEFAULT_PASSWORD: postgres
-        ports:
-          - "5050:80"
-    ```
-
+```yaml
+version: "3.9" # https://docs.docker.com/compose/gettingstarted/
+services:
+  postgres:
+    image: postgres:16.1
+    container_name: postgres_rnp
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+  
+  pgadmin4:
+    container_name: pgadmin4_rnp # http://localhost:5050/
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@postgres.co
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    ports:
+      - "5050:80"
+```
 3. Run the next command to deploy and run DB and DB Admin containers
-    ```shell
-    docker-compose -p nestjs_db_test -f docker-compose.yml up postgres pgadmin4 -d
-    ```
-   if you need to stop services then run the next command
-
-    ```shell
-    docker stop pgadmin4 postgres
-    ```
-   see running containers
-    ```shell
-    docker ps
-    ```
+```shell
+docker-compose -p nestjs_db_test -f docker-compose.yml up postgres pgadmin4 -d
+```
+see running containers
+```shell
+docker ps
+```
+output example
+```shell
+CONTAINER ID   IMAGE            COMMAND                  CREATED              STATUS              PORTS                           NAMES
+7f4c91554891   postgres:16.1    "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:5432->5432/tcp          postgres_rnp
+64f1e06a577d   dpage/pgadmin4   "/entrypoint.sh"         About a minute ago   Up About a minute   443/tcp, 0.0.0.0:5050->80/tcp   pgadmin4_rnp
+ ```
+   
+if you need to stop services then run the next command
+```shell
+docker stop pgadmin4_rnp postgres_rnp
+```
 
 4. In new project directory run the next command<br>
-   https://www.prisma.io/docs/getting-started/quickstart
-   https://docs.nestjs.com/recipes/prisma#set-up-prisma
+[Prisma ORM quick start](https://www.prisma.io/docs/getting-started/quickstart)<br>
+[Prisma ORM setup](https://docs.nestjs.com/recipes/prisma#set-up-prisma)
 
-    ```shell
-    npm install prisma --save-dev
-    ```
-
+```shell
+npm install prisma --save-dev
+```
 5. Run the next command that creates a new prisma directory with your Prisma schema file
    and configures PostgreSQL as your database. You're now ready to model your data and create
    your database with some tables
-    ```shell
-    npx prisma init --datasource-provider postgresql
-    ```
-
-6. Open created .env file and change db settings
-    ```shell
-    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/testdb?schema=public"
-    ```
-
-7. Open schema.prisma file and add your db model to the end of file
+```shell
+npx prisma init --datasource-provider postgresql
+```
+6. Open created **.env** file and change db settings
+```shell
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/testdb?schema=public"
+```
+7. Open **schema.prisma** file and add your db model to the end of file
 ```prisma
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
-  createdAt DateTime  @default(now()) @map(name: "created_at")
+  id        Int      @default(autoincrement()) @id
+  email     String   @unique
+  name      String?  
+  posts     Post[]   
+  createdAt DateTime @default(now()) @map(name: "created_at")
+
   @@map(name: "user")
 }
 
 model Post {
   id        Int      @default(autoincrement()) @id
-  title     String
-  content   String?
+  title     String   
+  content   String?  
   published Boolean? @default(false)
   author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int? @map(name: "author_id")
-  createdAt DateTime  @default(now()) @map(name: "created_at")
+  authorId  Int?     @map(name: "author_id")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+
   @@map(name: "post")
 }
 ```
 
 8. Run migration to create database tables with Prisma Migrate
-    ```shell
-    npx prisma migrate dev --name init
-    ```
-   This command did three things:<br>
-    * It created a new SQL migration file for this migration in the prisma/migrations directory.<br>
-    * It executed the SQL migration file against the database.<br>
-    * It ran prisma generate under the hood (which installed the @prisma/client package and generated a tailored Prisma Client API based on your models).<br>
-      And defined via the environment variable in the .env file.
+```shell
+npx prisma migrate dev --name init
+```
+This command did three things:<br>
 
+* It created a new SQL migration file for this migration in the prisma/migrations directory.<br>
+* It executed the SQL migration file against the database.<br>
+* It ran prisma generate under the hood (which installed the @prisma/client package and generated a tailored Prisma
+  Client API based on your models).<br>
+  And defined via the environment variable in the .env file.
 
-9. Generate Prisma Service for nestjs project
-   https://docs.nestjs.com/recipes/prisma#set-up-prisma
-
-    ```bash
-    npx nest g s services/prisma
-    ```
+9. Generate Prisma Service for nestjs project.
+Read [Prisma setup](https://docs.nestjs.com/recipes/prisma#set-up-prisma)
+```bash
+npx nest g s services/prisma
+```
 
 10. Change PrismaService
-
 ```ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+    async onModuleInit() {
+        await this.$connect();
+    }
 }
 ```
 
@@ -212,8 +215,8 @@ export class UserService {
 }
 ```
 
-
 13. Create Post service
+
 ```bash
 npx nest g s repositories/post
 ```
@@ -334,62 +337,64 @@ export class UserController {
 17. Change post controller
 
 ```ts
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { PostService } from '../../repositories/post/post.service';
-import { Post as PostModel } from '@prisma/client';
+import {Body, Controller, Get, Param, Post} from '@nestjs/common';
+import {PostService} from '../../repositories/post/post.service';
+import {Post as PostModel} from '@prisma/client';
 
 @Controller()
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+    constructor(private readonly postService: PostService) {
+    }
 
-  @Get('post/:id')
-  async getPostById(@Param('id') id: string): Promise<PostModel> {
-    return this.postService.post({ id: Number(id) });
-  }
+    @Get('post/:id')
+    async getPostById(@Param('id') id: string): Promise<PostModel> {
+        return this.postService.post({id: Number(id)});
+    }
 
-  @Get('feed')
-  async getPublishedPosts(): Promise<PostModel[]> {
-    return this.postService.posts({
-      where: { published: true },
-    });
-  }
+    @Get('feed')
+    async getPublishedPosts(): Promise<PostModel[]> {
+        return this.postService.posts({
+            where: {published: true},
+        });
+    }
 
-  @Get('filtered-posts/:searchString')
-  async getFilteredPosts(
-    @Param('searchString') searchString: string,
-  ): Promise<PostModel[]> {
-    return this.postService.posts({
-      where: {
-        OR: [
-          {
-            title: { contains: searchString },
-          },
-          {
-            content: { contains: searchString },
-          },
-        ],
-      },
-    });
-  }
+    @Get('filtered-posts/:searchString')
+    async getFilteredPosts(
+        @Param('searchString') searchString: string,
+    ): Promise<PostModel[]> {
+        return this.postService.posts({
+            where: {
+                OR: [
+                    {
+                        title: {contains: searchString},
+                    },
+                    {
+                        content: {contains: searchString},
+                    },
+                ],
+            },
+        });
+    }
 
-  @Post('post')
-  async createDraft(
-    @Body() postData: { title: string; content?: string; authorEmail: string },
-  ): Promise<PostModel> {
-    const { title, content, authorEmail } = postData;
-    return this.postService.createPost({
-      title,
-      content,
-      author: {
-        connect: { email: authorEmail },
-      },
-    });
-  }
+    @Post('post')
+    async createDraft(
+        @Body() postData: { title: string; content?: string; authorEmail: string },
+    ): Promise<PostModel> {
+        const {title, content, authorEmail} = postData;
+        return this.postService.createPost({
+            title,
+            content,
+            author: {
+                connect: {email: authorEmail},
+            },
+        });
+    }
 }
 ```
 
 18. Rest calls test<br>
     Create User
+
 ```shell
 curl -X 'POST' \
   'http://localhost:3002/user' \
@@ -402,6 +407,7 @@ curl -X 'POST' \
 ```
 
 Get all users
+
 ```shell
 curl -X 'GET' \
   'http://localhost:3000/users' \
@@ -409,6 +415,7 @@ curl -X 'GET' \
 ```
 
 Get all user pages
+
 ```shell
 curl -X 'GET' \
   'http://localhost:3002/users/pages?search=aaaa&page=1&pageSize=5' \
@@ -418,51 +425,54 @@ curl -X 'GET' \
 ## Add simple validator
 
 1. Create simple custom validator
+
 ```shell
 nest g cl validators/string-param-validator
 ```
 
 2. Change validator class
+
 ```ts
-import { Injectable, PipeTransform, BadRequestException } from '@nestjs/common';
+import {Injectable, PipeTransform, BadRequestException} from '@nestjs/common';
 
 @Injectable()
 export class StringParamValidator implements PipeTransform<any, string> {
-  transform(value: { name?: string; email: string }): any {
-    if (/\b(a|an|the)\b/i.test(value.name)) {
-      throw new BadRequestException(
-        'Invalid name parameter article in the name',
-      );
+    transform(value: { name?: string; email: string }): any {
+        if (/\b(a|an|the)\b/i.test(value.name)) {
+            throw new BadRequestException(
+                'Invalid name parameter article in the name',
+            );
+        }
+        return value;
     }
-    return value;
-  }
 }
 ```
 
 3. Add this validator to User controller
 
 ```ts
-import { Body, Controller, Get, Post, UsePipes } from '@nestjs/common';
-import { UserService } from '../../repositories/user/user.service';
-import { User as UserModel } from '@prisma/client';
-import { StringParamValidator } from '../../validators/string-param-validator/string-param-validator';
+import {Body, Controller, Get, Post, UsePipes} from '@nestjs/common';
+import {UserService} from '../../repositories/user/user.service';
+import {User as UserModel} from '@prisma/client';
+import {StringParamValidator} from '../../validators/string-param-validator/string-param-validator';
 
 @Controller()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+    constructor(private readonly userService: UserService) {
+    }
 
-  @Get('users')
-  async getUsers(): Promise<UserModel[]> {
-    return this.userService.users({});
-  }
+    @Get('users')
+    async getUsers(): Promise<UserModel[]> {
+        return this.userService.users({});
+    }
 
-  @Post('user')
-  @UsePipes(StringParamValidator)
-  async signupUser(
-    @Body() userData: { name?: string; email: string },
-  ): Promise<UserModel> {
-    return this.userService.createUser(userData);
-  }
+    @Post('user')
+    @UsePipes(StringParamValidator)
+    async signupUser(
+        @Body() userData: { name?: string; email: string },
+    ): Promise<UserModel> {
+        return this.userService.createUser(userData);
+    }
 }
 ```
 
