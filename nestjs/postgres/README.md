@@ -125,21 +125,20 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 ```
 
 11. Create User service
-    ```bash
-    npx nest g s repositories/user
-    ```
+```bash
+npx nest g s repositories/user
+```
 
 12. Change User service
 
 ```ts
-import {Injectable} from '@nestjs/common';
-import {User, Prisma} from '@prisma/client';
-import {PrismaService} from '../../services/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { User, Prisma } from '@prisma/client';
+import { PrismaService } from '../../services/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService) {
-    }
+    constructor(private prisma: PrismaService) {}
 
     async user(
         userWhereUniqueInput: Prisma.UserWhereUniqueInput,
@@ -156,7 +155,7 @@ export class UserService {
         where?: Prisma.UserWhereInput;
         orderBy?: Prisma.UserOrderByWithRelationInput;
     }): Promise<User[]> {
-        const {skip, take, cursor, where, orderBy} = params;
+        const { skip, take, cursor, where, orderBy } = params;
         return this.prisma.user.findMany({
             skip,
             take,
@@ -166,8 +165,14 @@ export class UserService {
         });
     }
 
-    async usersWithPaging(params): Promise<{ pagination: { total: any }, users: any }> {
-        const {skip, take, cursor, where, orderBy} = params;
+    async usersWithPaging(params: {
+        skip?: number;
+        take?: number;
+        cursor?: Prisma.UserWhereUniqueInput;
+        where?: Prisma.UserWhereInput;
+        orderBy?: Prisma.UserOrderByWithRelationInput;
+    }): Promise<{ pagination: { total: any }; users: User[] }> {
+        const { skip, take, cursor, where, orderBy } = params;
         const [users, count] = await this.prisma.$transaction([
             this.prisma.user.findMany({
                 skip,
@@ -200,7 +205,7 @@ export class UserService {
         where: Prisma.UserWhereUniqueInput;
         data: Prisma.UserUpdateInput;
     }): Promise<User> {
-        const {where, data} = params;
+        const { where, data } = params;
         return this.prisma.user.update({
             data,
             where,
@@ -213,26 +218,23 @@ export class UserService {
         });
     }
 }
+
 ```
 
 13. Create Post service
-
 ```bash
 npx nest g s repositories/post
 ```
 
 14. Change Post service
-
 ```ts
-
-import {Injectable} from '@nestjs/common';
-import {Post, Prisma} from '@prisma/client';
-import {PrismaService} from '../../services/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { Post, Prisma } from '@prisma/client';
+import { PrismaService } from '../../services/prisma/prisma.service';
 
 @Injectable()
 export class PostService {
-    constructor(private prisma: PrismaService) {
-    }
+    constructor(private prisma: PrismaService) {}
 
     async post(
         postWhereUniqueInput: Prisma.PostWhereUniqueInput,
@@ -249,7 +251,7 @@ export class PostService {
         where?: Prisma.PostWhereInput;
         orderBy?: Prisma.PostOrderByWithRelationInput;
     }): Promise<Post[]> {
-        const {skip, take, cursor, where, orderBy} = params;
+        const { skip, take, cursor, where, orderBy } = params;
         return this.prisma.post.findMany({
             skip,
             take,
@@ -269,7 +271,7 @@ export class PostService {
         where: Prisma.PostWhereUniqueInput;
         data: Prisma.PostUpdateInput;
     }): Promise<Post> {
-        const {data, where} = params;
+        const { data, where } = params;
         return this.prisma.post.update({
             data,
             where,
@@ -286,28 +288,35 @@ export class PostService {
 ```
 
 15. Create User controller
-    ```shell
-    npx nest g co controllers/user
-    ```
+```shell
+npx nest g co controllers/user
+```
 
 16.Change User controller
 
 ```ts
-import {Body, Controller, Get, Post} from '@nestjs/common';
-import {UserService} from '../../repositories/user/user.service';
-import {User as UserModel} from '@prisma/client';
+import {
+    Body,
+    Controller,
+    DefaultValuePipe,
+    Get,
+    ParseIntPipe,
+    Post,
+    Query,
+} from '@nestjs/common';
+import { UserService } from '../../repositories/user/user.service';
+import { User as UserModel } from '@prisma/client';
 
 @Controller()
 export class UserController {
-    constructor(private readonly userService: UserService) {
-    }
+    constructor(private readonly userService: UserService) {}
 
     @Get('users')
     async getUsers(): Promise<UserModel[]> {
         return this.userService.users({});
     }
 
-    @Get('users')
+    @Get('user/pages')
     async getUsersWithPaging(
         @Query('search') search,
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
